@@ -106,16 +106,21 @@ always_ff @(posedge clock) begin
   // aqui falta codigo
 end
 
+// TODO: implementar na prova
 always_comb begin
    case(op)
-      default: IMM <= 0;
+        RType: IMM <= 0;
+        SType: IMM <= {instruction[27:25], instruction[11:7]};
+        SBType: IMM <= {instruction[29:25], instruction[11:9]};
+        default: IMM <= instruction[27:20];
    endcase
 
-   PCPlus <= pc + 4;
-   PCBranch <= 0;  // alvo do desvio (condicional ou incondicional)
+   PCPlus <= pc + !busy + 4;
+   PCBranch <= (IMM * 4) + pc;  // alvo do desvio (condicional ou incondicional)
 end
 always_comb begin // este always_comb ficou dividido para agrador Icaro
-   ppc <= PCPlus;
+   if(PCSrc) ppc <= PCBranch;
+   else ppc <= PCPlus;
 
         if (reset)     pc_  <= 0;     // NAO MEXE neste linha
    else                pc_  <= ppc;
