@@ -35,6 +35,19 @@ logic [NBITS-1:0] ALUResult, Result;
 
 // ****** banco de registradores
 
+// TODO: implementar na prova
+// funct7  funct3         instruction
+/* 0000000 0000 */ parameter ADD  = 'b0000; // operando +
+/* 0100000 1000 */ parameter SUB  = 'b1000; // operando -
+/* 0000000 0001 */ parameter SLL  = 'b0001; // operando <<
+/* 0000000 0010 */ parameter SLT  = 'b0010; // operando < (argumentos numeros inteiros)
+/* 0000000 0011 */ parameter SLTU = 'b0011; // operando < (argumentos numeros naturais c/ zero)
+/* 0000000 0100 */ parameter XOR  = 'b0100; // operando ^
+/* 0000000 0101 */ parameter SRL  = 'b0101; // operando >>
+/* 0100000 1101 */ parameter SRA  = 'b1101; // operando >>>
+/* 0000000 0110 */ parameter OR   = 'b0110; // operando |
+/* 0000000 0111 */ parameter AND  = 'b0111; // operando &
+
 logic [NBITS-1:0] registrador [0:NREGS-1];
 
 always_ff @(posedge clock)
@@ -43,9 +56,11 @@ always_ff @(posedge clock)
       registrador[i] <= 0;
   else registrador[0] <= 0;
 
+// TODO: implementar na prova
 always_comb begin // barramentos indo para a ULA
-  SrcA <= 0;
-  SrcB <= 0;
+  SrcA <= registrador[RS1];
+  if(ALUSrc) SrcB <= IMM;
+  else SrcB <= registrador[RS2];
   SrcAs <= SrcA;
   SrcBs <= SrcB;
 end
