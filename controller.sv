@@ -27,6 +27,27 @@ parameter SBType = 'b11000;
 parameter UJType = 'b11011;
 parameter EType  = 'b11100;  // instrucoes ECALL e EBREAK
 
+//TODO: implementar na prova
+// Branchs
+parameter BEQ = 'b000;
+parameter BNE = 'b001;
+parameter BLT = 'b100;
+parameter BGE = 'b101;
+parameter BLTU = 'b110;
+parameter BGEU = 'b111;
+// Aritimeticas
+parameter ADDSUB3 = 'b000
+parameter OR3 = 'b110;
+parameter AND3 = 'b111;
+parameter XOR3 = 'b100;
+parameter SLL3 = 'b001;
+parameter SLT3 = 'b010;
+parameter SLTU3 = 'b011;
+parameter SLRSRA3 = 'b101;
+
+
+//TODO: implementar na prova
+parameter FIRST = 'b0000000;
 
 module controller #(parameter NBITS=8, NREGS=32, WIDTH_ALUF=4) (
   input logic clock, reset,
