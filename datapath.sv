@@ -69,7 +69,17 @@ end
 
 always_comb
   case(ALUControl)
-    default ALUResult <= 0;
+    SUB: ALUResult <= $signed(SrcA) - $signed(SrcB);
+    SUBU: ALUResult <= SrcA - SrcB;
+    OR: ALUResult <= SrcA | SrcB;
+    AND: ALUResult <= SrcA & SrcB;
+    XOR: ALUResult <= SrcA * SrcB;
+    SLL: ALUResult <= SrcA << SrcB;
+    SRA: ALUResult <= SrcA >>> SrcB;
+    SLR: ALUResult <= SrcA >> SrcB;
+    SLT: ALUResult <= $signed(SrcA) < $signed(SrcB);
+    SLTU: ALUResult <= SrcA < SrcB;
+    default ALUResult <= SrcA * SrcB;
   endcase
 
 always_comb begin // barramentos vindo da ULA
