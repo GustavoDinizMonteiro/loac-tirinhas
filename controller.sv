@@ -155,17 +155,85 @@ always_comb begin
    ALUSrc   <= (op == IType) || (op == LType) || (op == SType);
 end
 
+// TODO: implementar na prova
 always_comb begin
-   MemRead <= 0; // flag de leitura para uso de cache
-   RegWrite <= 0;  // evita que lixo seja encaminhado para registradores
+   MemRead <= (op == LType); // flag de leitura para uso de cache
+   RegWrite <= (op == IType) || (op == LType) || (op == RType);  // evita que lixo seja encaminhado para registradores
 
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
 
-   PCSrc <= 0;
-
    case(op)
-      default: ALUControl <= ADD;
+        SBType: begin
+            unique case(funct3)
+                BEQ: begin
+                    PCSrc <= Branch && Zero;
+                    ALUControl <= SUB;
+                end
+                BNE: begin
+                    PCSrc <= Branch && !Zero;
+                    ALUControl <= SUB;
+                end
+                BLT: begin
+                    PCSrc <= Branch && Neg;
+                    ALUControl <= SUB;
+                end
+                BGE: begin
+                    PCSrc <= Branch && !Neg;
+                    ALUControl <= SUB;
+                end
+                BLTU: begin
+                    PCSrc <= Branch && Neg;
+                    ALUControl <= SUB;
+                end
+                BGEU: begin
+                    PCSrc <= Branch && !Neg;
+                    ALUControl <= SUB;
+                end
+            endcase
+        end
+
+        Itype: begin
+            PCSrc <= 0;
+            unique case(funct3)
+                ADDSUB3: ALUControl <= ADD;
+                OR3: ALUControl <= OR;
+                AND3: ALUControl <= AND;
+                XOR3: ALUControl <= XOR;
+                SLL3: ALUControl <= SLL;
+                SLT3: ALUControl <= SLT;
+                SLTU3: ALUControl <= SLTU;
+                SLRSRA3: begin
+                    if (funct7 == FIRST) ALUControl <= SRL;
+                    else ALUControl <= SRA; 
+                end
+            endcase
+        end
+
+        RType: begin
+            PCSrc <= 0;
+            unique case(func3)
+                ADDSUB3: begin
+                    if (funct7 == FIRST) ALUControl <= ADD;
+                    else ALUControl <= SUB;
+                end
+                OR3: ALUControl <= OR;
+                AND3: ALUControl <= AND;
+                XOR3: ALUControl <= XOR;
+                SLL3: ALUControl <= SLL;
+                SLT3: ALUControl <= SLT;
+                SLTU3: ALUControl <= SLTU;
+                SLRSRA3: begin
+                    if (funct7 == FIRST) ALUControl <= SRL;
+                    else ALUControl <= SRA; 
+                end
+            endcase
+        end
+
+        default: begin
+           ALUControl <= ADD;
+           PCSrcm <= 0;  
+        end
    endcase
 end
 
