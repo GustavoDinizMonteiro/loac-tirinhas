@@ -133,25 +133,26 @@ end
 
 inst i(pc_, clock, instruction);  // NAO MEXE - dentro da memoria a entrada eh registrada
 
+// TODO: implementar na prova
 always_comb begin
-   RS2 <= 0;
-   RS1 <= 0;
-   RD <= 0;
-   op <= 0;
-   funct7 <= 0;
-   funct3 <= 0;
+   RS2 <= instruction[24:20];
+   RS1 <= instruction[19:15];
+   RD <= instruction[11:7];
+   op <= instruction[6:2];
+   funct7 <= instruction[31:25];
+   funct3 <= instruction[14:12];
 end
 
 // ***** sinais de controle para o datapath e para o proprio controller
-
+// TODO: implementar na prova
 always_comb begin
-   MemtoReg <= (op == -1);
-   MemWrite <= (op == -1);
-   Branch   <= (op == -1);
+   MemtoReg <= (op == LType);
+   MemWrite <= (op == SType);
+   Branch   <= (op == SBType);
    ju       <= (op == -1);
    jr       <= (op == -1);
    csrr     <= (op == -1);
-   ALUSrc   <= (op == -1);
+   ALUSrc   <= (op == IType) || (op == LType) || (op == SType);
 end
 
 always_comb begin
