@@ -29,7 +29,8 @@ always_ff @(posedge clock)
 
 // entrada de dados
 always_comb
-  memReadData <= 0;
+  if (op === LType) memReadData <= ReadData;
+  else memReadData <= 0;
 
 memo m(.address(memAddress), .clock(clock), .data(memWriteData), .wren(memMemWrite), .q(ReadData));
 
