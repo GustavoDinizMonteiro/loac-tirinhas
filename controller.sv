@@ -115,7 +115,7 @@ always_comb begin
         default: IMM <= instruction[27:20];
    endcase
 
-   PCPlus <= pc + !busy + 4;
+   PCPlus <= pc + !busy * 4;
    PCBranch <= (IMM * 4) + pc;  // alvo do desvio (condicional ou incondicional)
 end
 always_comb begin // este always_comb ficou dividido para agrador Icaro
