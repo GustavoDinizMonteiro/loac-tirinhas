@@ -76,7 +76,8 @@ always_comb begin // barramentos vindo da ULA
     // para salvar o valor proveniente do PC
     Result <= pclink;
   else 
-    Result <= 0;
+    if (MemtoReg) Result <= ReadData;
+    else Result <= ALUResult;
 end
 
 // a zoiada
