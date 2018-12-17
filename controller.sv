@@ -28,6 +28,7 @@ parameter UJType = 'b11011;
 parameter EType  = 'b11100;  // instrucoes ECALL e EBREAK
 
 parameter ADDSUB3 = 'b000;
+parameter FIRST = 'b0000000;
 
 module controller #(parameter NBITS=8, NREGS=32, WIDTH_ALUF=4) (
   input logic clock, reset,
@@ -137,10 +138,15 @@ always_comb begin
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
 
-   PCSrc <= 0;
-
    case(op)
-      default: ALUControl <= ADD;
+      RType: begin
+         if (funct7 == FIRST) ALUControl <= ADD;
+         else ALUControl <= SUB;
+      end
+      default: begin
+         PCSrc <= 0;
+         ALUControl <= ADD;
+      end
    endcase
 end
 

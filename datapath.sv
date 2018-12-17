@@ -34,6 +34,7 @@ logic [NBITS-1:0] SUBResult;  // para poder recuperar o vai-um
 logic [NBITS-1:0] ALUResult, Result;
 
 // ****** banco de registradores
+/* 0100000 1000 */ parameter SUB  = 'b1000; // operando -
 
 logic [NBITS-1:0] registrador [0:NREGS-1];
 
@@ -55,6 +56,7 @@ end
 
 always_comb
   case(ALUControl)
+    SUB: ALUResult <= $signed(SrcA) - $signed(SrcB);
     default ALUResult <= SrcA + SrcB;
   endcase
 
