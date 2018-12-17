@@ -41,11 +41,12 @@ always_ff @(posedge clock)
   if (reset)
     for (int i=0; i < NREGS; i = i + 1)
       registrador[i] <= 0;
-  else registrador[0] <= 0;
+  else if(RD != 0 && WriteData) registrador[RD] <= Result;
 
 always_comb begin // barramentos indo para a ULA
-  SrcA <= 0;
-  SrcB <= 0;
+  SrcA <= registrador[RS1];
+  if(ALUSrc) SrcB <= IMM;
+  else SrcB <= registrador[RS2];
   SrcAs <= SrcA;
   SrcBs <= SrcB;
 end
@@ -54,7 +55,7 @@ end
 
 always_comb
   case(ALUControl)
-    default ALUResult <= 0;
+    default ALUResult <= SrcA + SrcB;
   endcase
 
 always_comb begin // barramentos vindo da ULA
@@ -64,19 +65,19 @@ always_comb begin // barramentos vindo da ULA
   // flags para desvio condicional, usadas para comparar os valores de dois resgistradores
   // por meio da operacao de subtracao da ULA
   {Carry,SUBResult} <= 0;
-  Zero <= 0;   // valores SrcA e SrcB sao iguais
-  Neg <= 0;    // SrcA < SrcB
+  Zero <= (ALUResult == 0);   // valores SrcA e SrcB sao iguais
+  Neg <= (ALUResult < 0);    // SrcA < SrcB
 
   // barramentos indo para memoria de dados
-  Address <=0; // saida da ULA vai para endereco de memoria
-  WriteData <= 0;
+  Address <= ALUResult[7:2]; // saida da ULA vai para endereco de memoria
+  WriteData <= registrador[RS2];
 
   // mux para barramento Result, o qual esta indo para o banco de registradores
   if (link)
     // para salvar o valor proveniente do PC
     Result <= pclink;
-  else 
-    Result <= 0;
+  else if (MemtoReg) Result <= ReadData;
+  else Result <= ALUResult;
 end
 
 // a zoiada
