@@ -54,7 +54,7 @@ always_ff @(posedge clock)
   if (reset)
     for (int i=0; i < NREGS; i = i + 1)
       registrador[i] <= 0;
-  else registrador[0] <= 0;
+  else if(RD != 0 && RegWrite) registrador[RD] <= Result;
 
 // TODO: implementar na prova
 always_comb begin // barramentos indo para a ULA
