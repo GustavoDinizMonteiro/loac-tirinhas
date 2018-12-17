@@ -27,6 +27,7 @@ parameter SBType = 'b11000;
 parameter UJType = 'b11011;
 parameter EType  = 'b11100;  // instrucoes ECALL e EBREAK
 
+parameter ADDSUB3 = 'b000;
 
 module controller #(parameter NBITS=8, NREGS=32, WIDTH_ALUF=4) (
   input logic clock, reset,
@@ -87,10 +88,11 @@ end
 
 always_comb begin
    case(op)
-      default: IMM <= 0;
+      RType: IMM <= 0;
+      default: IMM <= registrador[27:20];
    endcase
 
-   PCPlus <= pc + 4;
+   PCPlus <= pc + !busy * 4;
    PCBranch <= 0;  // alvo do desvio (condicional ou incondicional)
 end
 always_comb begin // este always_comb ficou dividido para agrador Icaro
@@ -108,29 +110,29 @@ end
 inst i(pc_, clock, instruction);  // NAO MEXE - dentro da memoria a entrada eh registrada
 
 always_comb begin
-   RS2 <= 0;
-   RS1 <= 0;
-   RD <= 0;
-   op <= 0;
-   funct7 <= 0;
-   funct3 <= 0;
+   RS2 <= registrador[24:20];
+   RS1 <= registrador[19:15];
+   RD <= registrador[11:7];
+   op <= registrador[6:2];
+   funct7 <= registrador[31:25];
+   funct3 <= registrador[14:12];
 end
 
 // ***** sinais de controle para o datapath e para o proprio controller
 
 always_comb begin
    MemtoReg <= (op == -1);
-   MemWrite <= (op == -1);
+   MemWrite <= (op == RType);
    Branch   <= (op == -1);
    ju       <= (op == -1);
    jr       <= (op == -1);
    csrr     <= (op == -1);
-   ALUSrc   <= (op == -1);
+   ALUSrc   <= (op == IType || op == RType);
 end
 
 always_comb begin
    MemRead <= 0; // flag de leitura para uso de cache
-   RegWrite <= 0;  // evita que lixo seja encaminhado para registradores
+   RegWrite <= (op == IType || op == RType);  // evita que lixo seja encaminhado para registradores
 
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
