@@ -34,6 +34,7 @@ logic [NBITS-1:0] SUBResult;  // para poder recuperar o vai-um
 logic [NBITS-1:0] ALUResult, Result;
 
 // ****** banco de registradores
+/* 0000000 0011 */ parameter SLTU = 'b0011; // operando < (argumentos numeros naturais c/ zero)
 
 logic [NBITS-1:0] registrador [0:NREGS-1];
 
@@ -41,11 +42,12 @@ always_ff @(posedge clock)
   if (reset)
     for (int i=0; i < NREGS; i = i + 1)
       registrador[i] <= 0;
-  else registrador[0] <= 0;
+  else if(rd != 0 && RegWrite) registrador[RD] <= Result;
 
 always_comb begin // barramentos indo para a ULA
-  SrcA <= 0;
-  SrcB <= 0;
+  SrcA <= registrador[RS1];
+  if (ALUSrc) SrcB <= IMM;
+  else SrcB <= registrador[RS2];
   SrcAs <= SrcA;
   SrcBs <= SrcB;
 end
@@ -54,7 +56,8 @@ end
 
 always_comb
   case(ALUControl)
-    default ALUResult <= 0;
+    SLTU: ALUResult <= SrcA < SrcB;
+    default ALUResult <= SrcA + SrcB;
   endcase
 
 always_comb begin // barramentos vindo da ULA
@@ -68,15 +71,15 @@ always_comb begin // barramentos vindo da ULA
   Neg <= 0;    // SrcA < SrcB
 
   // barramentos indo para memoria de dados
-  Address <=0; // saida da ULA vai para endereco de memoria
-  WriteData <= 0;
+  Address <= ALUResult[7:2]; // saida da ULA vai para endereco de memoria
+  WriteData <= registrador[RS2];
 
   // mux para barramento Result, o qual esta indo para o banco de registradores
   if (link)
     // para salvar o valor proveniente do PC
     Result <= pclink;
   else 
-    Result <= 0;
+    Result <= ALUResult;
 end
 
 // a zoiada
