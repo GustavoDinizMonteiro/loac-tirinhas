@@ -67,8 +67,8 @@ always_comb begin // barramentos vindo da ULA
   // flags para desvio condicional, usadas para comparar os valores de dois resgistradores
   // por meio da operacao de subtracao da ULA
   {Carry,SUBResult} <= 0;
-  Zero <= 0;   // valores SrcA e SrcB sao iguais
-  Neg <= 0;    // SrcA < SrcB
+  Zero <= (ALUResult == 0);   // valores SrcA e SrcB sao iguais
+  Neg <= (ALUResult < 0);    // SrcA < SrcB
 
   // barramentos indo para memoria de dados
   Address <= ALUResult[7:2]; // saida da ULA vai para endereco de memoria

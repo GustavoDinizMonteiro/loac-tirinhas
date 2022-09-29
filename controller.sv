@@ -28,6 +28,10 @@ parameter UJType = 'b11011;
 parameter EType  = 'b11100;  // instrucoes ECALL e EBREAK
 
 
+parameter SLL = 'b001;
+parameter ADDSUB3 = 'b000;
+parameter FIRST = 'b0000000;
+
 module controller #(parameter NBITS=8, NREGS=32, WIDTH_ALUF=4) (
   input logic clock, reset,
 
@@ -91,7 +95,7 @@ always_comb begin
       default: IMM <= registrador[27:20];
    endcase
 
-   PCPlus <= pc + 4;
+   PCPlus <= pc + !busy * 4;
    PCBranch <= 0;  // alvo do desvio (condicional ou incondicional)
 end
 always_comb begin // este always_comb ficou dividido para agrador Icaro
@@ -121,7 +125,7 @@ end
 
 always_comb begin
    MemtoReg <= (op == -1);
-   MemWrite <= (op == -1);
+   MemWrite <= (op == RType);
    Branch   <= (op == -1);
    ju       <= (op == -1);
    jr       <= (op == -1);
@@ -136,11 +140,17 @@ always_comb begin
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
 
-   PCSrc <= 0;
-
    case(op)
       RType: ALUControl <= SLT;
       default: ALUControl <= ADD;
+      RType: begin
+         if (funct7 == FIRST) ALUControl <= ADD;
+         else ALUControl <= SUB;
+      end
+      default: begin
+         PCSrc <= 0;
+         ALUControl <= ADD;
+      end
    endcase
 end
 
