@@ -34,6 +34,7 @@ logic [NBITS-1:0] SUBResult;  // para poder recuperar o vai-um
 logic [NBITS-1:0] ALUResult, Result;
 
 // ****** banco de registradores
+/* 0100000 1000 */ parameter SUB  = 'b1000; // operando -
 
 logic [NBITS-1:0] registrador [0:NREGS-1];
 
@@ -55,7 +56,8 @@ end
 
 always_comb
   case(ALUControl)
-    default ALUResult <= 0;
+    SUB: ALUResult <= $signed(SrcA) - $signed(SrcB);
+    default ALUResult <= SrcA + SrcB;
   endcase
 
 always_comb begin // barramentos vindo da ULA
@@ -65,19 +67,19 @@ always_comb begin // barramentos vindo da ULA
   // flags para desvio condicional, usadas para comparar os valores de dois resgistradores
   // por meio da operacao de subtracao da ULA
   {Carry,SUBResult} <= 0;
-  Zero <= 0;   // valores SrcA e SrcB sao iguais
-  Neg <= 0;    // SrcA < SrcB
+  Zero <= (ALUResult == 0);   // valores SrcA e SrcB sao iguais
+  Neg <= (ALUResult < 0);    // SrcA < SrcB
 
   // barramentos indo para memoria de dados
-  Address <=0; // saida da ULA vai para endereco de memoria
-  WriteData <= 0;
+  Address <= ALUResult[7:2]; // saida da ULA vai para endereco de memoria
+  WriteData <= registrador[RS2];
 
   // mux para barramento Result, o qual esta indo para o banco de registradores
   if (link)
     // para salvar o valor proveniente do PC
     Result <= pclink;
-  else 
-    Result <= 0;
+  else if (MemtoReg) Result <= ReadData;
+  else Result <= ALUResult;
 end
 
 // a zoiada
