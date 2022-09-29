@@ -27,7 +27,8 @@ parameter SBType = 'b11000;
 parameter UJType = 'b11011;
 parameter EType  = 'b11100;  // instrucoes ECALL e EBREAK
 
-parameter ADD <= 'b000;
+parameter ADDSUB3 = 'b000;
+parameter FIRST = 'b0000000;
 
 module controller #(parameter NBITS=8, NREGS=32, WIDTH_ALUF=4) (
   input logic clock, reset,
@@ -88,6 +89,7 @@ end
 
 always_comb begin
    case(op)
+      RType: IMM <= 0;
       default: IMM <= registrador[27:20];
    endcase
 
@@ -121,25 +123,30 @@ end
 
 always_comb begin
    MemtoReg <= (op == -1);
-   MemWrite <= (op == -1);
+   MemWrite <= (op == RType);
    Branch   <= (op == -1);
    ju       <= (op == -1);
    jr       <= (op == -1);
    csrr     <= (op == -1);
-   ALUSrc   <= (op == IType);
+   ALUSrc   <= (op == IType || op == RType);
 end
 
 always_comb begin
    MemRead <= 0; // flag de leitura para uso de cache
-   RegWrite <= (op == IType);  // evita que lixo seja encaminhado para registradores
+   RegWrite <= (op == IType || op == RType);  // evita que lixo seja encaminhado para registradores
 
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
 
-   PCSrc <= 0;
-
    case(op)
-      default: ALUControl <= ADD;
+      RType: begin
+         if (funct7 == FIRST) ALUControl <= ADD;
+         else ALUControl <= SUB;
+      end
+      default: begin
+         PCSrc <= 0;
+         ALUControl <= ADD;
+      end
    endcase
 end
 

@@ -34,6 +34,7 @@ logic [NBITS-1:0] SUBResult;  // para poder recuperar o vai-um
 logic [NBITS-1:0] ALUResult, Result;
 
 // ****** banco de registradores
+/* 0100000 1000 */ parameter SUB  = 'b1000; // operando -
 
 logic [NBITS-1:0] registrador [0:NREGS-1];
 
@@ -41,11 +42,12 @@ always_ff @(posedge clock)
   if (reset)
     for (int i=0; i < NREGS; i = i + 1)
       registrador[i] <= 0;
-  else registrador[0] <= 0;
+  else if(RD != 0 && WriteData) registrador[RD] <= Result;
 
 always_comb begin // barramentos indo para a ULA
   SrcA <= registrador[RS1];
-  SrcB <= IMM;
+  if(ALUSrc) SrcB <= IMM;
+  else SrcB <= registrador[RS2];
   SrcAs <= SrcA;
   SrcBs <= SrcB;
 end
@@ -54,6 +56,7 @@ end
 
 always_comb
   case(ALUControl)
+    SUB: ALUResult <= $signed(SrcA) - $signed(SrcB);
     default ALUResult <= SrcA + SrcB;
   endcase
 
@@ -75,9 +78,8 @@ always_comb begin // barramentos vindo da ULA
   if (link)
     // para salvar o valor proveniente do PC
     Result <= pclink;
-  else 
-    if (MemtoReg) Result <= ReadData;
-    else Result <= ALUResult;
+  else if (MemtoReg) Result <= ReadData;
+  else Result <= ALUResult;
 end
 
 // a zoiada
