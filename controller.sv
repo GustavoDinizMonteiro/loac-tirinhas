@@ -130,7 +130,7 @@ always_comb begin
    ju       <= (op == -1);
    jr       <= (op == -1);
    csrr     <= (op == -1);
-   ALUSrc   <= (op == IType || op == RType);
+   ALUSrc   <= (op == IType) || (op == RType);
 end
 
 always_comb begin
@@ -141,7 +141,7 @@ always_comb begin
    eflag <= 0;
 
    case(op)
-      RType: ALUControl <= SLL;
+      RType: ALUControl <= SLTU;
       default: ALUControl <= ADD;
       RType: begin
          if (funct7 == FIRST) ALUControl <= ADD;
