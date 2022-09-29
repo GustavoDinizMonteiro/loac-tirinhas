@@ -27,6 +27,8 @@ parameter SBType = 'b11000;
 parameter UJType = 'b11011;
 parameter EType  = 'b11100;  // instrucoes ECALL e EBREAK
 
+
+parameter SLL = 'b001;
 parameter ADDSUB3 = 'b000;
 parameter FIRST = 'b0000000;
 
@@ -133,12 +135,14 @@ end
 
 always_comb begin
    MemRead <= 0; // flag de leitura para uso de cache
-   RegWrite <= (op == IType || op == RType);  // evita que lixo seja encaminhado para registradores
+   RegWrite <= (op == IType) || (op == RType);  // evita que lixo seja encaminhado para registradores
 
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
 
    case(op)
+      RType: ALUControl <= SLL;
+      default: ALUControl <= ADD;
       RType: begin
          if (funct7 == FIRST) ALUControl <= ADD;
          else ALUControl <= SUB;

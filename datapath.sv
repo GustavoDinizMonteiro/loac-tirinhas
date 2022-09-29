@@ -42,11 +42,11 @@ always_ff @(posedge clock)
   if (reset)
     for (int i=0; i < NREGS; i = i + 1)
       registrador[i] <= 0;
-  else if(RD != 0 && WriteData) registrador[RD] <= Result;
+  else if(RD != 0 && RegWrite) registrador[RD] <= Result;
 
 always_comb begin // barramentos indo para a ULA
   SrcA <= registrador[RS1];
-  if(ALUSrc) SrcB <= IMM;
+  if (ALUSrc) SrcB <= IMM;
   else SrcB <= registrador[RS2];
   SrcAs <= SrcA;
   SrcBs <= SrcB;
