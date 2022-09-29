@@ -34,7 +34,7 @@ logic [NBITS-1:0] SUBResult;  // para poder recuperar o vai-um
 logic [NBITS-1:0] ALUResult, Result;
 
 // ****** banco de registradores
-/* 0000000 0011 */ parameter SLTU = 'b0011; // operando < (argumentos numeros naturais c/ zero)
+parameter SLT = 'b0010;
 
 logic [NBITS-1:0] registrador [0:NREGS-1];
 
@@ -42,7 +42,7 @@ always_ff @(posedge clock)
   if (reset)
     for (int i=0; i < NREGS; i = i + 1)
       registrador[i] <= 0;
-  else if(rd != 0 && RegWrite) registrador[RD] <= Result;
+  else if(RD != 0 && RegWrite) registrador[RD] <= Result;
 
 always_comb begin // barramentos indo para a ULA
   SrcA <= registrador[RS1];
@@ -56,7 +56,7 @@ end
 
 always_comb
   case(ALUControl)
-    SLTU: ALUResult <= SrcA < SrcB;
+    SLT: ALUResult <= SrcA < SrcB;
     default ALUResult <= SrcA + SrcB;
   endcase
 
@@ -80,7 +80,6 @@ always_comb begin // barramentos vindo da ULA
     Result <= pclink;
   else 
     Result <= ALUResult;
-
 end
 
 // a zoiada

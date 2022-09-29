@@ -101,7 +101,7 @@ end
 always_comb begin // este always_comb ficou dividido para agrador Icaro
    ppc <= PCPlus;
 
-        if (reset)     pc_  <= 0;     // NAO MEXE neste linha
+   if (reset)     pc_  <= 0;     // NAO MEXE neste linha
    else                pc_  <= ppc;
 
    pclink <= 0;
@@ -130,18 +130,18 @@ always_comb begin
    ju       <= (op == -1);
    jr       <= (op == -1);
    csrr     <= (op == -1);
-   ALUSrc   <= (op == IType) || (op == RType);
+   ALUSrc   <= (op == IType) || op == RType);
 end
 
 always_comb begin
    MemRead <= 0; // flag de leitura para uso de cache
-   RegWrite <= (op == IType) || (op == RType);  // evita que lixo seja encaminhado para registradores
+   RegWrite <= (op == RType) || (op == IType);  // evita que lixo seja encaminhado para registradores
 
    //Table 6.13 Selected EFLAGS
    eflag <= 0;
 
    case(op)
-      RType: ALUControl <= SLTU;
+      RType: ALUControl <= SLT;
       default: ALUControl <= ADD;
       RType: begin
          if (funct7 == FIRST) ALUControl <= ADD;
